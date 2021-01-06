@@ -1,18 +1,16 @@
 package jm.task.core.jdbc.util;
 
-
-import com.mysql.cj.jdbc.MysqlDataSource;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.Transaction;
 import org.hibernate.cfg.Configuration;
 
-import javax.sql.DataSource;
-import java.io.FileInputStream;
-import java.util.Properties;
-import java.util.TimeZone;
+import java.sql.*;
+
 
 public class Util {
+    private Session session;
+    private Transaction transaction;
 
     public static SessionFactory buildSessionFactory() {
         try {
@@ -27,11 +25,6 @@ public class Util {
         buildSessionFactory().close();
     }
 
-
-    private Session session;
-
-    private Transaction transaction;
-
     public Session getSession() {
         return session;
     }
@@ -41,25 +34,43 @@ public class Util {
     }
 
     public Session openSession() {
-        return Util.buildSessionFactory().openSession();
+        session = Util.buildSessionFactory().openSession();
+        return session;
 
     }
 
-    public Session openTransactionSession() {
-        session = openSession();
+    public Transaction openTransaction() {
         transaction = session.beginTransaction();
-        return session;
+        return transaction;
     }
 
     public void closeSession() {
         session.close();
     }
 
-    public void closeTransactionSession() {
+    public void commitTransaction() {
         transaction.commit();
-        closeSession();
     }
 
+
+    //
+    // Предыдущее задание
+
+    private String userName = "root";
+    private String password = "root";
+    private String connectionURL = "jdbc:mysql://localhost:3306/mydbtest?useUnicode=true&useJDBCCompliantTimezoneShift=true&useLegacyDatetimeCode=false&serverTimezone=UTC";
+
+    public Connection getConnection() {
+        Connection connection = null;
+        try {
+            Class.forName("com.mysql.cj.jdbc.Driver");
+            connection = DriverManager.getConnection(connectionURL, userName, password);
+            Statement statement = connection.createStatement();
+        } catch (ClassNotFoundException | SQLException e) {
+            e.printStackTrace();
+        }
+        return connection;
+    }
 
 /**
  public Util() {
